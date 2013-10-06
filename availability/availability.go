@@ -10,3 +10,7 @@ type Availability interface {
 	SetAt(at time.Time, value byte)
 	GetAt(at time.Time) byte
 }
+
+type AvailabilityCollection interface {
+	Find(id string) Availability
+}
