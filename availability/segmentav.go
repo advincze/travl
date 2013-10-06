@@ -6,38 +6,38 @@ import (
 	"time"
 )
 
-type SegmentAvailability struct {
-	ID          string
-	internalRes TimeResolution
-	segmentSize int
-	bsp         BitSegmentPersistor
+type SegmentAv struct {
+	ID            string
+	internalRes   TimeResolution
+	segmentSize   int
+	bitAvSegments map[string]map[int]*BitSegment
 }
 
-func NewSegmentAvailability(id string, res TimeResolution) *SegmentAvailability {
-	return &SegmentAvailability{
-		ID:          id,
-		internalRes: res,
-		segmentSize: int(Day / res),
-		bsp:         NewBitSegmentMemPersistor(),
+func NewSegmentAv(id string, res TimeResolution) *SegmentAv {
+	return &SegmentAv{
+		ID:            id,
+		internalRes:   res,
+		segmentSize:   int(Day / res),
+		bitAvSegments: make(map[string]map[int]*BitSegment),
 	}
 }
 
-func (av *SegmentAvailability) size() int {
+func (av *SegmentAv) size() int {
 	var size int
-	segments := av.bsp.FindAll(av.ID)
+	segments := av.bitAvSegments[av.ID]
 	for _, segment := range segments {
 		size += len(segment.Bytes())
 	}
 	return size
 }
 
-func (av *SegmentAvailability) Set(from, to time.Time, value byte) {
+func (av *SegmentAv) Set(from, to time.Time, value byte) {
 	fromUnit := TimeToUnitFloor(from, av.internalRes)
 	toUnit := TimeToUnitFloor(to, av.internalRes)
 	av.setUnitInternal(fromUnit, toUnit, value)
 }
 
-func (av *SegmentAvailability) Get(from, to time.Time, res TimeResolution) *BitVector {
+func (av *SegmentAv) Get(from, to time.Time, res TimeResolution) *BitVector {
 
 	if res > av.internalRes {
 		// lower resolution
@@ -141,21 +141,21 @@ func reduceMajority(data []byte) byte {
 	return 0
 }
 
-func (av *SegmentAvailability) SetAt(at time.Time, value byte) {
+func (av *SegmentAv) SetAt(at time.Time, value byte) {
 	atUnit := TimeToUnitFloor(at, av.internalRes)
 	av.setUnitInternal(atUnit, atUnit+1, value)
 }
 
-func (av *SegmentAvailability) GetAt(at time.Time) byte {
+func (av *SegmentAv) GetAt(at time.Time) byte {
 	atUnit := TimeToUnitFloor(at, av.internalRes)
 	arr := av.getUnitInternal(atUnit, atUnit+1)
 	return byte(arr[0])
 }
 
-func (av *SegmentAvailability) String() string {
+func (av *SegmentAv) String() string {
 	var buffer bytes.Buffer
 
-	segments := av.bsp.FindAll(av.ID)
+	segments := av.bitAvSegments[av.ID]
 	for _, segment := range segments {
 		buffer.WriteString(strconv.Itoa(segment.start))
 		buffer.WriteString("->")
@@ -166,31 +166,41 @@ func (av *SegmentAvailability) String() string {
 	return buffer.String()
 }
 
-func (av *SegmentAvailability) segmentStart(i int) int {
+func (av *SegmentAv) segmentStart(i int) int {
 	return i - i%av.segmentSize
 }
 
-func (av *SegmentAvailability) getOrEmptyBitSegment(startValue int) *BitSegment {
-	if segment := av.bsp.Find(av.ID, startValue); segment != nil {
+func (av *SegmentAv) getOrEmptyBitSegment(startValue int) *BitSegment {
+	if segment := av.bitAvSegments[av.ID][startValue]; segment != nil {
 		return segment
 	}
 	return NewBitSegment(av.ID, startValue)
 }
 
-func (av *SegmentAvailability) setUnitInternal(from, to int, value byte) {
+func (av *SegmentAv) setUnitInternal(from, to int, value byte) {
 	currentBitSegment := av.getOrEmptyBitSegment(av.segmentStart(from))
 	for i, j := from, from%av.segmentSize; i < to; i, j = i+1, j+1 {
 		if j == av.segmentSize {
-			av.bsp.Save(currentBitSegment)
+			av.Savex(currentBitSegment)
 			currentBitSegment = av.getOrEmptyBitSegment(i)
 			j = 0
 		}
 		currentBitSegment.SetBit(&currentBitSegment.Int, j, uint(value))
 	}
-	av.bsp.Save(currentBitSegment)
+	av.Savex(currentBitSegment)
 }
 
-func (av *SegmentAvailability) getUnitInternal(from, to int) []byte {
+func (av *SegmentAv) Savex(s *BitSegment) {
+	segments, ok := av.bitAvSegments[s.ID]
+	if !ok {
+		segments = make(map[int]*BitSegment)
+		av.bitAvSegments[s.ID] = segments
+	}
+	segments[s.start] = s
+
+}
+
+func (av *SegmentAv) getUnitInternal(from, to int) []byte {
 	length := to - from
 	result := make([]byte, length)
 	currentBitSegment := av.getOrEmptyBitSegment(av.segmentStart(from))

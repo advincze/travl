@@ -12,5 +12,5 @@ type Availability interface {
 }
 
 type AvailabilityCollection interface {
-	Find(id string) Availability
+	FindOrCreate(id string) Availability
 }

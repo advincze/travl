@@ -8,7 +8,7 @@ import (
 
 func getAvailability(res TimeResolution) Availability {
 	//clear the DB
-	return NewSegmentAvailability("testID", res)
+	return NewSegmentAv("testID", res)
 }
 
 func TestNewAvailabilityShouldNotBeNil(t *testing.T) {
