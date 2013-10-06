@@ -12,6 +12,14 @@ type BitSegment struct {
 	ID    string
 }
 
+func NewBitSegment(id string, start int) *BitSegment {
+	return &BitSegment{
+		Int:   *big.NewInt(0),
+		start: start,
+		ID:    id,
+	}
+}
+
 func (s *BitSegment) String() string {
 	var buffer bytes.Buffer
 
@@ -20,12 +28,4 @@ func (s *BitSegment) String() string {
 	}
 
 	return buffer.String()
-}
-
-func NewBitSegment(id string, start int) *BitSegment {
-	return &BitSegment{
-		Int:   *big.NewInt(0),
-		start: start,
-		ID:    id,
-	}
 }
