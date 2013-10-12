@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// helper functions
+
 func TestMultiplyEmptyArrayByFactor(t *testing.T) {
 	result := multiplyByFactor([]byte{}, 5)
 	if !bytes.Equal([]byte{}, result) {
@@ -26,6 +28,8 @@ func TestMultiplyArrayByFactorThree(t *testing.T) {
 		t.Errorf("should be an empty array\n")
 	}
 }
+
+// availability functionality
 
 func getAvailability(res TimeResolution) *Availability {
 	//clear the DB
