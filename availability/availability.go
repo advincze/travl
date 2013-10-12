@@ -36,6 +36,25 @@ func (av *Availability) Set(from, to time.Time, value byte) {
 	av.setUnitInternal(fromUnit, toUnit, value)
 }
 
+func (av *Availability) SetAt(at time.Time, value byte) {
+	atUnit := TimeToUnitFloor(at, av.internalRes)
+	av.setUnitInternal(atUnit, atUnit+1, value)
+}
+
+func (av *Availability) setUnitInternal(from, to int, value byte) {
+	currentBitSegment := av.getOrEmptyBitSegment(av.segmentStart(from))
+	for i, j := from, from%av.segmentSize; i < to; i, j = i+1, j+1 {
+		if j == av.segmentSize {
+			av.Segments[currentBitSegment.start] = currentBitSegment
+
+			currentBitSegment = av.getOrEmptyBitSegment(i)
+			j = 0
+		}
+		currentBitSegment.SetBit(&currentBitSegment.Int, j, uint(value))
+	}
+	av.Segments[currentBitSegment.start] = currentBitSegment
+}
+
 func (av *Availability) Get(from, to time.Time, res TimeResolution) *AvailabilityResult {
 	if res > av.internalRes {
 		return av.getWithLowerResolution(from, to, res)
@@ -88,6 +107,7 @@ func multiplyByFactor(data []byte, factor int) []byte {
 }
 
 func reduceByFactor(data []byte, factor int, reduceFn func([]byte) byte) []byte {
+	// [a,b,c,d,e,f,g,h,i] factor: 3 => [fn([a,b,c]), fn([d,e,f]), fn([g,h,i])]
 	length := len(data) / factor
 	var reducedData []byte = make([]byte, length)
 	for i, j := 0, 0; i < length; i++ {
@@ -129,52 +149,10 @@ func reduceMajority(data []byte) byte {
 	return 0
 }
 
-func (av *Availability) SetAt(at time.Time, value byte) {
-	atUnit := TimeToUnitFloor(at, av.internalRes)
-	av.setUnitInternal(atUnit, atUnit+1, value)
-}
-
 func (av *Availability) GetAt(at time.Time) byte {
 	atUnit := TimeToUnitFloor(at, av.internalRes)
 	arr := av.getUnitInternal(atUnit, atUnit+1)
 	return byte(arr[0])
-}
-
-func (av *Availability) String() string {
-	var buffer bytes.Buffer
-	for _, segment := range av.Segments {
-		buffer.WriteString(strconv.Itoa(segment.start))
-		buffer.WriteString("->")
-		buffer.WriteString(segment.String())
-		buffer.WriteRune('\n')
-	}
-
-	return buffer.String()
-}
-
-func (av *Availability) segmentStart(i int) int {
-	return i - i%av.segmentSize
-}
-
-func (av *Availability) getOrEmptyBitSegment(startValue int) *BitSegment {
-	if segment := av.Segments[startValue]; segment != nil {
-		return segment
-	}
-	return NewBitSegment(av.ID, startValue)
-}
-
-func (av *Availability) setUnitInternal(from, to int, value byte) {
-	currentBitSegment := av.getOrEmptyBitSegment(av.segmentStart(from))
-	for i, j := from, from%av.segmentSize; i < to; i, j = i+1, j+1 {
-		if j == av.segmentSize {
-			av.Segments[currentBitSegment.start] = currentBitSegment
-
-			currentBitSegment = av.getOrEmptyBitSegment(i)
-			j = 0
-		}
-		currentBitSegment.SetBit(&currentBitSegment.Int, j, uint(value))
-	}
-	av.Segments[currentBitSegment.start] = currentBitSegment
 }
 
 func (av *Availability) getUnitInternal(from, to int) []byte {
@@ -189,4 +167,26 @@ func (av *Availability) getUnitInternal(from, to int) []byte {
 		result[i] = byte(currentBitSegment.Bit(j))
 	}
 	return result
+}
+
+func (av *Availability) getOrEmptyBitSegment(startValue int) *BitSegment {
+	if segment := av.Segments[startValue]; segment != nil {
+		return segment
+	}
+	return NewBitSegment(av.ID, startValue)
+}
+
+func (av *Availability) segmentStart(i int) int {
+	return i - i%av.segmentSize
+}
+
+func (av *Availability) String() string {
+	var buffer bytes.Buffer
+	for _, segment := range av.Segments {
+		buffer.WriteString(strconv.Itoa(segment.start))
+		buffer.WriteString("->")
+		buffer.WriteString(segment.String())
+		buffer.WriteRune('\n')
+	}
+	return buffer.String()
 }
