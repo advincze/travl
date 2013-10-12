@@ -7,7 +7,7 @@ import (
 )
 
 func TestMultiplyEmptyArrayByFactor(t *testing.T) {
-	result := multiplyByFactor([]byte{}, 1)
+	result := multiplyByFactor([]byte{}, 5)
 	if !bytes.Equal([]byte{}, result) {
 		t.Errorf("should be an empty array\n")
 	}
