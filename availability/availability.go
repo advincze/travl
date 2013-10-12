@@ -7,25 +7,24 @@ import (
 )
 
 type Availability struct {
-	ID            string
-	internalRes   TimeResolution
-	segmentSize   int
-	bitAvSegments map[int]*BitSegment
+	ID          string
+	internalRes TimeResolution
+	segmentSize int
+	Segments    map[int]*BitSegment
 }
 
 func NewAvailability(id string, res TimeResolution) *Availability {
 	return &Availability{
-		ID:            id,
-		internalRes:   res,
-		segmentSize:   int(Day / res),
-		bitAvSegments: make(map[int]*BitSegment),
+		ID:          id,
+		internalRes: res,
+		segmentSize: int(Day / res),
+		Segments:    make(map[int]*BitSegment),
 	}
 }
 
 func (av *Availability) size() int {
 	var size int
-	segments := av.bitAvSegments
-	for _, segment := range segments {
+	for _, segment := range av.Segments {
 		size += len(segment.Bytes())
 	}
 	return size
@@ -136,9 +135,7 @@ func (av *Availability) GetAt(at time.Time) byte {
 
 func (av *Availability) String() string {
 	var buffer bytes.Buffer
-
-	segments := av.bitAvSegments
-	for _, segment := range segments {
+	for _, segment := range av.Segments {
 		buffer.WriteString(strconv.Itoa(segment.start))
 		buffer.WriteString("->")
 		buffer.WriteString(segment.String())
@@ -153,7 +150,7 @@ func (av *Availability) segmentStart(i int) int {
 }
 
 func (av *Availability) getOrEmptyBitSegment(startValue int) *BitSegment {
-	if segment := av.bitAvSegments[startValue]; segment != nil {
+	if segment := av.Segments[startValue]; segment != nil {
 		return segment
 	}
 	return NewBitSegment(av.ID, startValue)
@@ -163,14 +160,14 @@ func (av *Availability) setUnitInternal(from, to int, value byte) {
 	currentBitSegment := av.getOrEmptyBitSegment(av.segmentStart(from))
 	for i, j := from, from%av.segmentSize; i < to; i, j = i+1, j+1 {
 		if j == av.segmentSize {
-			av.bitAvSegments[currentBitSegment.start] = currentBitSegment
+			av.Segments[currentBitSegment.start] = currentBitSegment
 
 			currentBitSegment = av.getOrEmptyBitSegment(i)
 			j = 0
 		}
 		currentBitSegment.SetBit(&currentBitSegment.Int, j, uint(value))
 	}
-	av.bitAvSegments[currentBitSegment.start] = currentBitSegment
+	av.Segments[currentBitSegment.start] = currentBitSegment
 }
 
 func (av *Availability) getUnitInternal(from, to int) []byte {
