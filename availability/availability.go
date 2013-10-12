@@ -37,43 +37,41 @@ func (av *Availability) Set(from, to time.Time, value byte) {
 }
 
 func (av *Availability) Get(from, to time.Time, res TimeResolution) *AvailabilityResult {
-
 	if res > av.internalRes {
 		return av.getWithLowerResolution(from, to, res)
 	} else if res < av.internalRes {
 		return av.getWithHigherResolution(from, to, res)
-	} else {
-		return av.getWithInternalResolution(from, to, res)
 	}
+	return av.getWithInternalResolution(from, to, res)
 }
 
 func (av *Availability) getWithLowerResolution(from, to time.Time, res TimeResolution) *AvailabilityResult {
-	fromUnit := TimeToUnitFloor(FloorDate(from, res), av.internalRes)
-	toUnit := TimeToUnitFloor(CeilDate(to, res), av.internalRes)
+	fromUnit := TimeToUnitFloor(RoundDown(from, res), av.internalRes)
+	toUnit := TimeToUnitFloor(RoundUp(to, res), av.internalRes)
 	arr := av.getUnitInternal(fromUnit, toUnit)
 	factor := int(res / av.internalRes)
 	reducedArr := reduceByFactor(arr, factor, reduceAllOne)
-	return NewAvailabilityResult(res, av.internalRes, reducedArr, FloorDate(from, res))
+	return NewAvailabilityResult(res, av.internalRes, reducedArr, RoundDown(from, res))
 }
 
 func (av *Availability) getWithHigherResolution(from, to time.Time, res TimeResolution) *AvailabilityResult {
 	// higher resolution
 	fromUnitInternalRes := TimeToUnitFloor(from, av.internalRes)
-	toUnitInternalRes := TimeToUnitFloor(CeilDate(to, av.internalRes), av.internalRes)
+	toUnitInternalRes := TimeToUnitFloor(RoundUp(to, av.internalRes), av.internalRes)
 	arr := av.getUnitInternal(fromUnitInternalRes, toUnitInternalRes)
 	factor := int(av.internalRes / res)
 	arrMultiplied := multiplyByFactor(arr, factor)
 	cutoff := TimeToUnitFloor(from, res) - fromUnitInternalRes*factor
 	origlen := TimeToUnitFloor(to, res) - TimeToUnitFloor(from, res)
 	arrTrimmed := arrMultiplied[cutoff : cutoff+origlen]
-	return NewAvailabilityResult(res, av.internalRes, arrTrimmed, FloorDate(from, av.internalRes))
+	return NewAvailabilityResult(res, av.internalRes, arrTrimmed, RoundDown(from, av.internalRes))
 }
 
 func (av *Availability) getWithInternalResolution(from, to time.Time, res TimeResolution) *AvailabilityResult {
 	fromUnit := TimeToUnitFloor(from, res)
 	toUnit := TimeToUnitFloor(to, res)
 	arr := av.getUnitInternal(fromUnit, toUnit)
-	return NewAvailabilityResult(res, av.internalRes, arr, FloorDate(from, res))
+	return NewAvailabilityResult(res, av.internalRes, arr, RoundDown(from, res))
 }
 
 func multiplyByFactor(data []byte, factor int) []byte {

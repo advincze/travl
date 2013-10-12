@@ -19,22 +19,22 @@ func TestTimeToUnitFloor(t *testing.T) {
 	}
 }
 
-func TestFloorDate(t *testing.T) {
+func TestRoundDown(t *testing.T) {
 	t0 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
 	t1 := time.Date(1982, 2, 7, 0, 13, 0, 0, time.UTC)
 
-	t2 := FloorDate(t1, Hour)
+	t2 := RoundDown(t1, Hour)
 
 	if t2 != t0 {
 		t.Errorf("dates should be equal, %v, %v ", t0, t2)
 	}
 }
 
-func TestCeilDate(t *testing.T) {
+func TestRoundUp(t *testing.T) {
 	t0 := time.Date(1982, 2, 7, 1, 0, 0, 0, time.UTC)
 	t1 := time.Date(1982, 2, 7, 0, 13, 0, 0, time.UTC)
 
-	t2 := CeilDate(t1, Hour)
+	t2 := RoundUp(t1, Hour)
 
 	if t2 != t0 {
 		t.Errorf("dates should be equal, %v, %v ", t0, t2)
