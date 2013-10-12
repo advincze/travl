@@ -6,9 +6,30 @@ import (
 	"time"
 )
 
-func getAvailability(res TimeResolution) Availability {
+func TestMultiplyEmptyArrayByFactor(t *testing.T) {
+	result := multiplyByFactor([]byte{}, 1)
+	if !bytes.Equal([]byte{}, result) {
+		t.Errorf("should be an empty array\n")
+	}
+}
+
+func TestMultiplyArrayByFactorZero(t *testing.T) {
+	result := multiplyByFactor([]byte{1, 2, 3}, 0)
+	if !bytes.Equal([]byte{}, result) {
+		t.Errorf("should be an empty array\n")
+	}
+}
+
+func TestMultiplyArrayByFactorThree(t *testing.T) {
+	result := multiplyByFactor([]byte{1, 2, 3}, 3)
+	if !bytes.Equal([]byte{1, 1, 1, 2, 2, 2, 3, 3, 3}, result) {
+		t.Errorf("should be an empty array\n")
+	}
+}
+
+func getAvailability(res TimeResolution) *Availability {
 	//clear the DB
-	return NewSegmentAv("testID", res)
+	return NewAvailability("testID", res)
 }
 
 func TestNewAvailabilityShouldNotBeNil(t *testing.T) {
