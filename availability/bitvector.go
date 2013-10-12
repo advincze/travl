@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type BitVector struct {
+type AvailabilityResult struct {
 	Resolution         TimeResolution `json:"resolution"`
 	InternalResolution TimeResolution `json:"internal_resolution"`
 	From               time.Time      `json:"from"`
@@ -14,9 +14,9 @@ type BitVector struct {
 	Data               []byte         `json:"available"`
 }
 
-func NewBitVector(res, intRes TimeResolution, data []byte, from time.Time) *BitVector {
+func NewAvailabilityResult(res, intRes TimeResolution, data []byte, from time.Time) *AvailabilityResult {
 	to := from.Add(time.Duration(len(data)*int(res)) * time.Second)
-	return &BitVector{
+	return &AvailabilityResult{
 		Resolution:         res,
 		InternalResolution: res,
 		Data:               data,
@@ -25,10 +25,10 @@ func NewBitVector(res, intRes TimeResolution, data []byte, from time.Time) *BitV
 	}
 }
 
-func (b *BitVector) String() string {
+func (b *AvailabilityResult) String() string {
 	var buffer bytes.Buffer
 
-	buffer.WriteString("BitVector {")
+	buffer.WriteString("AvailabilityResult {")
 	buffer.WriteString("res: ")
 	buffer.WriteString(b.Resolution.String())
 	buffer.WriteString(", ")
@@ -52,7 +52,7 @@ func (b *BitVector) String() string {
 	return buffer.String()
 }
 
-func (bv *BitVector) MarshalJSON() ([]byte, error) {
+func (bv *AvailabilityResult) MarshalJSON() ([]byte, error) {
 
 	intdata := make([]int, len(bv.Data))
 	for k, v := range bv.Data {
@@ -74,7 +74,7 @@ func (bv *BitVector) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (bitVector *BitVector) All() bool {
+func (bitVector *AvailabilityResult) All() bool {
 	for _, b := range bitVector.Data {
 		if b == 0 {
 			return false
@@ -83,7 +83,7 @@ func (bitVector *BitVector) All() bool {
 	return true
 }
 
-func (bitVector *BitVector) Any() bool {
+func (bitVector *AvailabilityResult) Any() bool {
 	for _, b := range bitVector.Data {
 		if b == 1 {
 			return true
@@ -92,7 +92,7 @@ func (bitVector *BitVector) Any() bool {
 	return false
 }
 
-func (bitVector *BitVector) Count() int {
+func (bitVector *AvailabilityResult) Count() int {
 	count := 0
 	for _, b := range bitVector.Data {
 		if b == 1 {

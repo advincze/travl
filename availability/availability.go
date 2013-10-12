@@ -37,7 +37,7 @@ func (av *Availability) Set(from, to time.Time, value byte) {
 	av.setUnitInternal(fromUnit, toUnit, value)
 }
 
-func (av *Availability) Get(from, to time.Time, res TimeResolution) *BitVector {
+func (av *Availability) Get(from, to time.Time, res TimeResolution) *AvailabilityResult {
 
 	if res > av.internalRes {
 		// lower resolution
@@ -46,7 +46,7 @@ func (av *Availability) Get(from, to time.Time, res TimeResolution) *BitVector {
 		arr := av.getUnitInternal(fromUnit, toUnit)
 		factor := int(res / av.internalRes)
 		reducedArr := reduceByFactor(arr, factor, reduceAllOne)
-		return NewBitVector(res, av.internalRes, reducedArr, FloorDate(from, res))
+		return NewAvailabilityResult(res, av.internalRes, reducedArr, FloorDate(from, res))
 
 	} else if res < av.internalRes {
 		// higher resolution
@@ -58,13 +58,13 @@ func (av *Availability) Get(from, to time.Time, res TimeResolution) *BitVector {
 		cutoff := TimeToUnitFloor(from, res) - fromUnitInternalRes*factor
 		origlen := TimeToUnitFloor(to, res) - TimeToUnitFloor(from, res)
 		arrTrimmed := arrMultiplied[cutoff : cutoff+origlen]
-		return NewBitVector(res, av.internalRes, arrTrimmed, FloorDate(from, av.internalRes))
+		return NewAvailabilityResult(res, av.internalRes, arrTrimmed, FloorDate(from, av.internalRes))
 	} else {
 		// internal resolution
 		fromUnit := TimeToUnitFloor(from, res)
 		toUnit := TimeToUnitFloor(to, res)
 		arr := av.getUnitInternal(fromUnit, toUnit)
-		return NewBitVector(res, av.internalRes, arr, FloorDate(from, res))
+		return NewAvailabilityResult(res, av.internalRes, arr, FloorDate(from, res))
 	}
 }
 
