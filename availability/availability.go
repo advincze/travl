@@ -16,6 +16,13 @@ func NewAvailability(res TimeResolution) *Availability {
 	}
 }
 
+func LoadAvailability(res TimeResolution, data *SegmentedVector) *Availability {
+	return &Availability{
+		internalRes: res,
+		data:        data,
+	}
+}
+
 func (av *Availability) Set(from, to time.Time, value byte) {
 	fromUnit := TimeToUnit(from, av.internalRes)
 	toUnit := TimeToUnit(to, av.internalRes)
@@ -46,7 +53,6 @@ func (av *Availability) getWithLowerResolution(from, to time.Time, res TimeResol
 }
 
 func (av *Availability) getWithHigherResolution(from, to time.Time, res TimeResolution) *AvailabilityResult {
-	// higher resolution
 	fromUnitInternalRes := TimeToUnit(from, av.internalRes)
 	toUnitInternalRes := TimeToUnit(RoundUp(to, av.internalRes), av.internalRes)
 	arr := av.data.Get(fromUnitInternalRes, toUnitInternalRes)
