@@ -5,14 +5,12 @@ import (
 )
 
 type Availability struct {
-	id          string
 	internalRes TimeResolution
 	data        *SegmentedVector
 }
 
-func NewAvailability(id string, res TimeResolution) *Availability {
+func NewAvailability(res TimeResolution) *Availability {
 	return &Availability{
-		id:          id,
 		internalRes: res,
 		data:        NewSegmentedVector(int(Day / res)),
 	}

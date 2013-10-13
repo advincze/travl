@@ -33,7 +33,7 @@ func TestMultiplyArrayByFactorThree(t *testing.T) {
 
 func getAvailability(res TimeResolution) *Availability {
 	//clear the DB
-	return NewAvailability("testID", res)
+	return NewAvailability(res)
 }
 
 func TestNewAvailabilityShouldNotBeNil(t *testing.T) {
