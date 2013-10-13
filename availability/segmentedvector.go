@@ -17,7 +17,7 @@ func NewSegmentedVector(segmentLength int) *SegmentedVector {
 	}
 }
 
-func (sv *SegmentedVector) setUnit(from, to int, value byte) {
+func (sv *SegmentedVector) Set(from, to int, value byte) {
 	segmentStart := sv.segmentStart(from)
 	segment := sv.getOrEmptyBitSegment(segmentStart)
 
@@ -40,7 +40,7 @@ func (sv *SegmentedVector) segmentStart(i int) int {
 	return i - i%sv.segmentLength
 }
 
-func (sv *SegmentedVector) getUnit(from, to int) []byte {
+func (sv *SegmentedVector) Get(from, to int) []byte {
 	length := to - from
 	result := make([]byte, length)
 	currentBitSegment := sv.getOrEmptyBitSegment(sv.segmentStart(from))
