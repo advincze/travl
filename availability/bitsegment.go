@@ -9,17 +9,15 @@ import (
 type BitSegment struct {
 	big.Int
 	start int
-	ID    string
 }
 
 func (bs *BitSegment) SetUnit(position int, value byte) {
 	bs.SetBit(&bs.Int, position, uint(value))
 }
 
-func NewBitSegment(id string, start int) *BitSegment {
+func NewBitSegment(start int) *BitSegment {
 	return &BitSegment{
 		start: start,
-		ID:    id,
 	}
 }
 

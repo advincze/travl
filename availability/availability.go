@@ -72,7 +72,7 @@ func (av *Availability) Get(from, to time.Time, res TimeResolution) *Availabilit
 func (av *Availability) getWithLowerResolution(from, to time.Time, res TimeResolution) *AvailabilityResult {
 	fromUnit := TimeToUnit(RoundDown(from, res), av.internalRes)
 	toUnit := TimeToUnit(RoundUp(to, res), av.internalRes)
-	arr := av.getUnitInternal(fromUnit, toUnit)
+	arr := av.getUnit(fromUnit, toUnit)
 	factor := int(res / av.internalRes)
 	reducedArr := reduceByFactor(arr, factor, reduceAllOne)
 	return NewAvailabilityResult(res, av.internalRes, reducedArr, RoundDown(from, res))
@@ -82,7 +82,7 @@ func (av *Availability) getWithHigherResolution(from, to time.Time, res TimeReso
 	// higher resolution
 	fromUnitInternalRes := TimeToUnit(from, av.internalRes)
 	toUnitInternalRes := TimeToUnit(RoundUp(to, av.internalRes), av.internalRes)
-	arr := av.getUnitInternal(fromUnitInternalRes, toUnitInternalRes)
+	arr := av.getUnit(fromUnitInternalRes, toUnitInternalRes)
 	factor := int(av.internalRes / res)
 	arrMultiplied := multiplyByFactor(arr, factor)
 	cutoff := TimeToUnit(from, res) - fromUnitInternalRes*factor
@@ -94,76 +94,18 @@ func (av *Availability) getWithHigherResolution(from, to time.Time, res TimeReso
 func (av *Availability) getWithInternalResolution(from, to time.Time, res TimeResolution) *AvailabilityResult {
 	fromUnit := TimeToUnit(from, res)
 	toUnit := TimeToUnit(to, res)
-	arr := av.getUnitInternal(fromUnit, toUnit)
+	arr := av.getUnit(fromUnit, toUnit)
 	return NewAvailabilityResult(res, av.internalRes, arr, RoundDown(from, res))
 }
 
-func multiplyByFactor(data []byte, factor int) []byte {
-	length := len(data) * factor
-	var multipliedData []byte = make([]byte, length)
-	j := 0
-	for _, b := range data {
-		for i := 0; i < factor; i++ {
-			multipliedData[j] = b
-			j++
-		}
-	}
-	return multipliedData
-}
-
-func reduceByFactor(data []byte, factor int, reduceFn func([]byte) byte) []byte {
-	//  example
-	//  [a,b,c,d,e,f,g,h,i] factor: 3
-	//  => [fn([a,b,c]), fn([d,e,f]), fn([g,h,i])]
-
-	length := len(data) / factor
-	var reducedData []byte = make([]byte, length)
-	for i, j := 0, 0; i < length; i++ {
-		reducedData[i] = reduceFn(data[j : j+factor])
-		j += factor
-	}
-	return reducedData
-}
-
-func reduceAllOne(data []byte) byte {
-	for _, b := range data {
-		if b != 1 {
-			return 0
-		}
-	}
-	return 1
-}
-
-func reduceAnyOne(data []byte) byte {
-	for _, b := range data {
-		if b == 1 {
-			return 1
-		}
-	}
-	return 0
-}
-
-func reduceMajority(data []byte) byte {
-	sizewin := len(data) / 2
-	count := 0
-	for _, b := range data {
-		if b == 1 {
-			count++
-		}
-	}
-	if count > sizewin {
-		return 1
-	}
-	return 0
-}
-
 func (av *Availability) GetAt(at time.Time) byte {
-	atUnit := TimeToUnit(at, av.internalRes)
-	arr := av.getUnitInternal(atUnit, atUnit+1)
+	fromUnit := TimeToUnit(at, av.internalRes)
+	toUnit := fromUnit + 1
+	arr := av.getUnit(fromUnit, toUnit)
 	return byte(arr[0])
 }
 
-func (av *Availability) getUnitInternal(from, to int) []byte {
+func (av *Availability) getUnit(from, to int) []byte {
 	length := to - from
 	result := make([]byte, length)
 	currentBitSegment := av.getOrEmptyBitSegment(av.segmentStart(from))
@@ -181,7 +123,7 @@ func (av *Availability) getOrEmptyBitSegment(startValue int) *BitSegment {
 	if segment := av.segments[startValue]; segment != nil {
 		return segment
 	}
-	return NewBitSegment(av.id, startValue)
+	return NewBitSegment(startValue)
 }
 
 func (av *Availability) segmentStart(i int) int {
