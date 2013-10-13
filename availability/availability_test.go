@@ -382,8 +382,37 @@ func TestSetAvTwoYearsWorkingHoursBackwards(t *testing.T) {
 
 }
 
-func BenchmarkSetAvOneDay(b *testing.B) {
+// func TestAvGobEncodeShouldReturnNoError(t *testing.T) {
 
+// 	av := getAvailability(Minute5)
+// 	t1 := time.Date(1982, 2, 7, 9, 0, 0, 0, time.UTC)
+// 	t2 := time.Date(1983, 4, 5, 0, 0, 0, 0, time.UTC)
+
+// 	av.Set(t1, t2, 1)
+
+// 	_, err := av.GobEncode()
+
+// 	if err != nil {
+// 		t.Errorf("gobencode should not return an error : %v ", err)
+// 	}
+
+// }
+
+// func BenchmarkAvGobEncodeOneDay(b *testing.B) {
+
+// 	av := getAvailability(Minute5)
+// 	t1 := time.Date(1982, 2, 7, 9, 0, 0, 0, time.UTC)
+// 	t2 := t1.Add(24 * time.Hour)
+
+// 	for i := 0; i < b.N; i++ {
+// 		av.Set(t1, t2, 1)
+// 		bytes, _ := av.GobEncode()
+// 		b.SetBytes(int64(len(bytes)))
+// 	}
+
+// }
+
+func BenchmarkSetAvOneDay(b *testing.B) {
 	av := getAvailability(Minute5)
 	t1 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
 

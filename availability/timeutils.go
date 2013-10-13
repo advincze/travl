@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-func TimeToUnitFloor(t time.Time, res TimeResolution) int {
+func TimeToUnit(t time.Time, res TimeResolution) int {
 	return int(t.Unix() / int64(res))
 }
 
