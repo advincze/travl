@@ -1,5 +1,10 @@
 package availability
 
+import (
+	"bytes"
+	"strconv"
+)
+
 type SegmentedVector struct {
 	segmentLength int
 	segments      map[int]*BitSegment
@@ -12,7 +17,7 @@ func NewSegmentedVector(segmentLength int) *SegmentedVector {
 	}
 }
 
-func (sv *SegmentedVector) Set(from, to int, value byte) {
+func (sv *SegmentedVector) setUnit(from, to int, value byte) {
 	segmentStart := sv.segmentStart(from)
 	segment := sv.getOrEmptyBitSegment(segmentStart)
 
@@ -54,4 +59,23 @@ func (sv *SegmentedVector) getOrEmptyBitSegment(startValue int) *BitSegment {
 		return segment
 	}
 	return NewBitSegment(startValue)
+}
+
+func (sv *SegmentedVector) SizeInBytes() int {
+	var sizeInBytes int
+	for _, segment := range sv.segments {
+		sizeInBytes += len(segment.Bytes())
+	}
+	return sizeInBytes
+}
+
+func (sv *SegmentedVector) String() string {
+	var buffer bytes.Buffer
+	for _, segment := range sv.segments {
+		buffer.WriteString(strconv.Itoa(segment.start))
+		buffer.WriteString("->")
+		buffer.WriteString(segment.String())
+		buffer.WriteRune('\n')
+	}
+	return buffer.String()
 }
