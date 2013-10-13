@@ -31,13 +31,8 @@ func TestMultiplyArrayByFactorThree(t *testing.T) {
 
 // availability functionality
 
-func getAvailability(res TimeResolution) *Availability {
-	//clear the DB
-	return NewAvailability(res)
-}
-
 func TestNewAvailabilityShouldNotBeNil(t *testing.T) {
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 
 	if av == nil {
 		t.Errorf("Availability should not be nil")
@@ -45,7 +40,7 @@ func TestNewAvailabilityShouldNotBeNil(t *testing.T) {
 }
 
 func TestSetAvAtShouldNotPanic(t *testing.T) {
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	t1 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
 
 	defer func() {
@@ -61,7 +56,7 @@ func TestGetAvAtEmpty(t *testing.T) {
 	// |0...000000000000000000000...000|
 	//          |get
 	t1 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 
 	//t
 	if av.GetAt(t1) == 1 {
@@ -71,9 +66,9 @@ func TestGetAvAtEmpty(t *testing.T) {
 
 func TestGetAvAtSet(t *testing.T) {
 	// |0...0001111111111111111100000...000|
-	//          |-get
+	//          |-get§
 	t1 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	av.SetAt(t1, 1)
 
 	//w
@@ -89,7 +84,7 @@ func TestGetAvAtUnset(t *testing.T) {
 	// |0...0001111111111111111100000...000|
 	//          |-get
 	t1 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	av.SetAt(t1, 0)
 
 	//w
@@ -102,7 +97,7 @@ func TestGetAvAtUnset(t *testing.T) {
 }
 
 func TestSetAvFromToShouldNotPanic(t *testing.T) {
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	t1 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
 	t2 := t1.Add(24 * time.Hour)
 
@@ -119,7 +114,7 @@ func TestGetAvNothingFromEmpty(t *testing.T) {
 	// |000000...000000000000|
 	//       || get
 	t1 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 
 	bitVector := av.Get(t1, t1, Minute5)
 
@@ -137,7 +132,7 @@ func TestGetAvFromEmpty(t *testing.T) {
 	//       |---get---|
 	t1 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
 	t2 := t1.Add(25 * time.Minute)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 
 	//w
 	bitVector := av.Get(t1, t2, Minute5)
@@ -158,7 +153,7 @@ func TestGetAvFromBeforeSet(t *testing.T) {
 	t2 := t1.Add(25 * time.Minute)
 	t3 := t1.Add(45 * time.Minute)
 	t4 := t1.Add(75 * time.Minute)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	av.Set(t3, t4, 1)
 
 	//w
@@ -180,7 +175,7 @@ func TestGetAvFromAfterSet(t *testing.T) {
 	t2 := t1.Add(15 * time.Minute)
 	t3 := t1.Add(45 * time.Minute)
 	t4 := t1.Add(55 * time.Minute)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	av.Set(t1, t2, 1)
 
 	//w
@@ -202,7 +197,7 @@ func TestGetAvFromInsideSet(t *testing.T) {
 	t2 := t1.Add(15 * time.Minute)
 	t3 := t1.Add(45 * time.Minute)
 	t4 := t1.Add(55 * time.Minute)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	av.Set(t1, t4, 1)
 
 	//w
@@ -225,7 +220,7 @@ func TestGetAvFromItersectBeforeSet(t *testing.T) {
 	t2 := t1.Add(15 * time.Minute)
 	t3 := t1.Add(45 * time.Minute)
 	t4 := t1.Add(55 * time.Minute)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	av.Set(t2, t4, 1)
 
 	//w
@@ -247,7 +242,7 @@ func TestGetAvWithLowerResolution(t *testing.T) {
 	t2 := t1.Add(15 * time.Minute)
 	t3 := t1.Add(45 * time.Minute)
 	t4 := t1.Add(55 * time.Minute)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	av.Set(t2, t4, 1)
 
 	//w
@@ -269,7 +264,7 @@ func TestGetAvWithHigherResolution(t *testing.T) {
 	t2 := t1.Add(15 * time.Minute)
 	t3 := t1.Add(45 * time.Minute)
 	t4 := t1.Add(55 * time.Minute)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	av.Set(t2, t4, 1)
 
 	//w
@@ -291,7 +286,7 @@ func TestGetAvFromItersectAfterSet(t *testing.T) {
 	t2 := t1.Add(15 * time.Minute)
 	t3 := t1.Add(45 * time.Minute)
 	t4 := t1.Add(55 * time.Minute)
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	av.Set(t1, t3, 1)
 
 	//w
@@ -308,7 +303,7 @@ func TestGetAvFromItersectAfterSet(t *testing.T) {
 
 func TestSetAvTwoYearsWorkingHoursShouldNotPanic(t *testing.T) {
 
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	t1 := time.Date(1982, 2, 7, 9, 0, 0, 0, time.UTC)
 
 	defer func() {
@@ -326,7 +321,7 @@ func TestSetAvTwoYearsWorkingHoursShouldNotPanic(t *testing.T) {
 
 func TestSetAvTwoYearsWorkingHoursBackwardsShouldNotPanic(t *testing.T) {
 
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	t1 := time.Date(1982, 2, 7, 9, 0, 0, 0, time.UTC)
 
 	defer func() {
@@ -344,7 +339,7 @@ func TestSetAvTwoYearsWorkingHoursBackwardsShouldNotPanic(t *testing.T) {
 
 func TestSetAvTwoYearsWorkingHours(t *testing.T) {
 
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	t1 := time.Date(1982, 2, 7, 9, 0, 0, 0, time.UTC)
 	t2 := time.Date(1983, 4, 5, 0, 0, 0, 0, time.UTC)
 
@@ -364,7 +359,7 @@ func TestSetAvTwoYearsWorkingHours(t *testing.T) {
 
 func TestSetAvTwoYearsWorkingHoursBackwards(t *testing.T) {
 
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	t1 := time.Date(1982, 2, 7, 9, 0, 0, 0, time.UTC)
 	t2 := time.Date(1981, 4, 5, 0, 0, 0, 0, time.UTC)
 
@@ -383,7 +378,7 @@ func TestSetAvTwoYearsWorkingHoursBackwards(t *testing.T) {
 }
 
 func BenchmarkSetAvOneDay(b *testing.B) {
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	t1 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
 
 	for i := 0; i < b.N; i++ {
@@ -394,7 +389,7 @@ func BenchmarkSetAvOneDay(b *testing.B) {
 
 func BenchmarkGetAvOneDay(b *testing.B) {
 
-	av := getAvailability(Minute5)
+	av := NewAvailability(Minute5)
 	t0 := time.Date(1982, 2, 7, 0, 0, 0, 0, time.UTC)
 	t1 := t0
 
