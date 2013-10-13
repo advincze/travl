@@ -18,3 +18,13 @@ func TestFindShouldReturnNilOnEmptyCollection(t *testing.T) {
 		t.Error("you should not find an availabilty for this id in an empty collection")
 	}
 }
+
+func TestFindShouldNotRetrieveNilForSavedAV(t *testing.T) {
+	avc := NewAvailabilityCollection()
+	av := NewAvailability(Minute5)
+	avc.SaveAvailability("0", av)
+	avFound := avc.FindAvailabilityById("0")
+	if avFound == nil {
+		t.Error("avc should return the previously saved av")
+	}
+}
