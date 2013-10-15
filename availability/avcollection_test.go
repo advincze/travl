@@ -17,6 +17,7 @@ func TestFindShouldReturnNilOnEmptyCollection(t *testing.T) {
 	if av != nil {
 		t.Error("you should not find an availabilty for this id in an empty collection")
 	}
+	t.Error("fail2")
 }
 
 func TestFindShouldNotRetrieveNilForSavedAV(t *testing.T) {
@@ -27,4 +28,28 @@ func TestFindShouldNotRetrieveNilForSavedAV(t *testing.T) {
 	if avFound == nil {
 		t.Error("avc should return the previously saved av")
 	}
+}
+
+type TestSuite struct {
+	param int
+}
+
+func (ts *TestSuite) TestWithParam(t *testing.T) {
+	if ts.param%2 == 0 {
+		t.Errorf("param was %d , fail", ts.param)
+	}
+}
+
+func TestSuitefunc(t *testing.T) {
+	testSuite := &TestSuite{param: 6}
+	for i := 0; i < 10; i++ {
+		TestNewAvCollectionShouldNotReturnNil(t)
+		TestFindShouldReturnNilOnEmptyCollection(t)
+		if i == 7 {
+			t.Error("fail")
+		}
+		testSuite.param = i
+		testSuite.TestWithParam(t)
+	}
+
 }
