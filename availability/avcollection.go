@@ -1,7 +1,7 @@
 package availability
 
 import (
-	"loveoneanother.at/tiedot/db"
+	"github.com/HouzuoGuo/tiedot/db"
 )
 
 type AvailabilityCollection interface {
